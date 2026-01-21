@@ -129,7 +129,7 @@ async def receive_data(
 
             ax.add_patch(rect)
             lane = i % 4
-            text_height = 7800 - (lane * 1500)
+            text_height = 7500 - (lane * 1500)
             # Add Label Text above the box (e.g., "Sparrow")
             ax.text(
                 safe_text_x,
@@ -212,7 +212,7 @@ async def receive_data(
         # Add Label Text above the box (e.g., "Sparrow")
         ax.text(
             safe_text_x,
-            text_height,
+            7500,
             bird["common_name"],
             color="white",
             fontweight="bold",
