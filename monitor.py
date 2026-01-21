@@ -106,9 +106,12 @@ async def receive_data(
         # Add Colorbar
         fig.colorbar(img, ax=ax, format="%+2.0f dB", shrink=0.7, pad=0.03)
 
-        ax.tick_params(axis="y", pad=15)  # Move Frequency numbers left
-        ax.tick_params(axis="x", pad=10)  # Move Time numbers down
-        ax.set_xlim(left=-0.5)
+        ax.spines['left'].set_position(('outward', 10))
+        ax.spines['bottom'].set_position(('outward', 10))
+        
+        # Clean up the other borders
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
 
         # 🆕 DRAW BOXES AROUND BIRDS
         for i, bird in enumerate(detections):
@@ -190,9 +193,12 @@ async def receive_data(
         # Add Colorbar
         fig.colorbar(img, ax=ax, format='%+2.0f dB', shrink=0.6, pad=0.03, anchor=(0.0, 0.2))
 
-        ax.tick_params(axis="y", pad=15)  # Move Frequency numbers left
-        ax.tick_params(axis="x", pad=10)  # Move Time numbers down
-        ax.set_xlim(left=-0.5)
+        ax.spines['left'].set_position(('outward', 10))
+        ax.spines['bottom'].set_position(('outward', 10))
+        
+        # Clean up the other borders
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
 
         # Get start and end time of the chirp
         t_start = bird["start_time"]
