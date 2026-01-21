@@ -77,12 +77,7 @@ async def receive_data(
 
     try:
         recording = Recording(
-            analyzer, 
-            audio_path, 
-            lat=lat, 
-            lon=lon, 
-            date=start_time_obj, 
-            min_conf=0.7
+            analyzer, audio_path, lat=lat, lon=lon, date=start_time_obj, min_conf=0.5
         )
 
         recording.analyze()
@@ -104,7 +99,7 @@ async def receive_data(
         img = librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', sr=sr, fmax=8000, ax=ax)
 
         # Add Colorbar
-        fig.colorbar(img, ax=ax, format='%+2.0f dB')
+        fig.colorbar(img, ax=ax, format='%+2.0f dB', shrink=0.75, pad=0.02)
 
         # 🆕 DRAW BOXES AROUND BIRDS
         for bird in detections:
@@ -172,7 +167,7 @@ async def receive_data(
         )
 
         # Add Colorbar
-        fig.colorbar(img, ax=ax, format="%+2.0f dB")
+        fig.colorbar(img, ax=ax, format="%+2.0f dB", shrink=0.75, pad=0.02)
 
         # Get start and end time of the chirp
         t_start = bird["start_time"]
