@@ -77,7 +77,7 @@ async def receive_data(
 
     try:
         recording = Recording(
-            analyzer, audio_path, lat=lat, lon=lon, date=start_time_obj, min_conf=0.5
+            analyzer, audio_path, lat=lat, lon=lon, date=start_time_obj, min_conf=0.7
         )
 
         recording.analyze()
@@ -89,9 +89,14 @@ async def receive_data(
 
     try:
         y, sr = librosa.load(audio_path, sr=None)
+        # Calculate duration of the whole file
+        file_duration = len(y) / sr
 
-        # Create figure
-        fig, ax = plt.subplots(figsize=(10, 6))
+        # Formula: 10 inches base width + 1 inch for every 10 seconds of audio
+        # We assume a max width of 50 to prevent crashing on huge files
+        dynamic_width = min(50, 10 + (file_duration / 10))
+
+        fig, ax = plt.subplots(figsize=(dynamic_width, 6))
 
         # Draw the Heatmap
         S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128, fmax=8000)
@@ -99,8 +104,12 @@ async def receive_data(
         img = librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', sr=sr, fmax=8000, ax=ax)
 
         # Add Colorbar
-        fig.colorbar(img, ax=ax, format='%+2.0f dB', shrink=0.75, pad=0.02)
-        i = 0
+        fig.colorbar(img, ax=ax, format="%+2.0f dB", shrink=0.7, pad=0.03)
+
+        ax.tick_params(axis="y", pad=15)  # Move Frequency numbers left
+        ax.tick_params(axis="x", pad=10)  # Move Time numbers down
+        ax.set_xlim(left=-0.5)
+
         # 🆕 DRAW BOXES AROUND BIRDS
         for i, bird in enumerate(detections):
             # Get start and end time of the chirp
@@ -115,20 +124,23 @@ async def receive_data(
                 linewidth=2, edgecolor='#FF0000', facecolor='#FF0000', alpha=0.15, zorder = 10
             )
             center_x = t_start + (duration / 2)
+            # 2. Clamp it so it never goes below 2.0 seconds (keeps text on screen)
+            safe_text_x = max(center_x, 0.5)
+
             ax.add_patch(rect)
-            lane = i 
-            text_height = 7600 - (lane * 600)
+            lane = i % 4
+            text_height = 7800 - (lane * 1500)
             # Add Label Text above the box (e.g., "Sparrow")
             ax.text(
-                center_x,
+                safe_text_x,
                 text_height,
                 bird["common_name"],
                 color="white",
                 fontweight="bold",
-                fontsize=5,
+                fontsize=8,
                 backgroundcolor="red",
-                zorder = 11,
-                ha = 'center'
+                zorder=11,
+                ha="center",
             )
 
         # Add Titles
@@ -159,8 +171,13 @@ async def receive_data(
         single_image_path = os.path.join("storage", single_image_filename)
 
         y, sr = librosa.load(audio_path, sr=None)
+        # Calculate duration of the whole file
+        file_duration = len(y) / sr
 
-        # Create figure
+        # Formula: 10 inches base width + 1 inch for every 10 seconds of audio
+        # We assume a max width of 50 to prevent crashing on huge files
+        dynamic_width = min(50, 10 + (file_duration / 10))
+
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Draw the Heatmap
@@ -171,7 +188,11 @@ async def receive_data(
         )
 
         # Add Colorbar
-        fig.colorbar(img, ax=ax, format="%+2.0f dB", shrink=0.75, pad=0.02)
+        fig.colorbar(img, ax=ax, format='%+2.0f dB', shrink=0.6, pad=0.03, anchor=(0.0, 0.2))
+
+        ax.tick_params(axis="y", pad=15)  # Move Frequency numbers left
+        ax.tick_params(axis="x", pad=10)  # Move Time numbers down
+        ax.set_xlim(left=-0.5)
 
         # Get start and end time of the chirp
         t_start = bird["start_time"]
@@ -187,18 +208,19 @@ async def receive_data(
         ax.add_patch(rect)
 
         center_x = t_start + (duration / 2)
+        safe_text_x = max(center_x, 2.0)
         # Add Label Text above the box (e.g., "Sparrow")
         ax.text(
-                center_x,
-                text_height,
-                bird["common_name"],
-                color="white",
-                fontweight="bold",
-                fontsize=5,
-                backgroundcolor="red",
-                zorder = 11,
-                ha = 'center'
-            )
+            safe_text_x,
+            text_height,
+            bird["common_name"],
+            color="white",
+            fontweight="bold",
+            fontsize=8,
+            backgroundcolor="red",
+            zorder=11,
+            ha="center",
+        )
 
         # Add Titles
         ax.set_title(f"Recorded: {recorded_at} | Lat: {lat}, Lon: {lon}")
