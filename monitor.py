@@ -100,9 +100,9 @@ async def receive_data(
 
         # Add Colorbar
         fig.colorbar(img, ax=ax, format='%+2.0f dB', shrink=0.75, pad=0.02)
-
+        i = 0
         # 🆕 DRAW BOXES AROUND BIRDS
-        for bird in detections:
+        for i, bird in enumerate(detections):
             # Get start and end time of the chirp
             t_start = bird['start_time']
             t_end = bird['end_time']
@@ -112,19 +112,23 @@ async def receive_data(
             # (x, y, width, height) -> x=time, y=0 (bottom), h=8000 (top)
             rect = patches.Rectangle(
                 (t_start, 0), duration, 8000, 
-                linewidth=2, edgecolor='red', facecolor='none', alpha=0.8
+                linewidth=2, edgecolor='#FF0000', facecolor='#FF0000', alpha=0.15, zorder = 10
             )
+            center_x = t_start + (duration / 2)
             ax.add_patch(rect)
-
+            lane = i 
+            text_height = 7600 - (lane * 600)
             # Add Label Text above the box (e.g., "Sparrow")
             ax.text(
-                t_start,
-                7500,
+                center_x,
+                text_height,
                 bird["common_name"],
                 color="white",
                 fontweight="bold",
-                fontsize=4.5,
+                fontsize=5,
                 backgroundcolor="red",
+                zorder = 11,
+                ha = 'center'
             )
 
         # Add Titles
@@ -177,26 +181,24 @@ async def receive_data(
         # Create a Red Rectangle (overlay)
         # (x, y, width, height) -> x=time, y=0 (bottom), h=8000 (top)
         rect = patches.Rectangle(
-            (t_start, 0),
-            duration,
-            8000,
-            linewidth=2,
-            edgecolor="red",
-            facecolor="none",
-            alpha=0.8,
-        )
+                (t_start, 0), duration, 8000, 
+                linewidth=2, edgecolor='#FF0000', facecolor='#FF0000', alpha=0.15, zorder = 10
+            )
         ax.add_patch(rect)
 
+        center_x = t_start + (duration / 2)
         # Add Label Text above the box (e.g., "Sparrow")
         ax.text(
-            t_start,
-            7500,
-            bird["common_name"],
-            color="white",
-            fontweight="bold",
-            fontsize=9,
-            backgroundcolor="red",
-        )
+                center_x,
+                text_height,
+                bird["common_name"],
+                color="white",
+                fontweight="bold",
+                fontsize=5,
+                backgroundcolor="red",
+                zorder = 11,
+                ha = 'center'
+            )
 
         # Add Titles
         ax.set_title(f"Recorded: {recorded_at} | Lat: {lat}, Lon: {lon}")
