@@ -1,21 +1,32 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
+import { Bird } from 'lucide-react';
 import { Hero } from './components/Hero';
 import { BirdGallery } from './components/BirdGallery';
 import { SessionDetail } from './components/SessionDetail';
+import { Analytics } from './components/Analytics';
 
 function App() {
   return (
-    <div className="min-h-screen bg-slate-50 bg-geometric-pattern">
-      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div className="min-h-screen bg-coastal-blue">
+      {/* Header - Brutal Style */}
+      <header className="fixed top-0 w-full z-50 bg-sand-light border-b-4 border-ink-black">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="font-display font-bold text-xl text-kingfisher-midnight tracking-tight">
-            Project <span className="text-kingfisher-royal">AvianNet</span>
-          </div>
+          <Link to="/" className="flex items-center gap-2 font-display font-bold text-xl text-ink-black tracking-tight uppercase">
+            <Bird className="w-6 h-6 text-coastal-blue" />
+            <span className="text-coastal-blue">Avian</span>Net
+          </Link>
           <nav className="hidden md:block">
-            <ul className="flex space-x-8 text-sm font-medium text-slate-600">
-              <li><a href="/" className="hover:text-kingfisher-royal transition-colors">Dashboard</a></li>
-              <li><a href="#" className="hover:text-kingfisher-royal transition-colors">Live Feed</a></li>
-              <li><a href="#" className="hover:text-kingfisher-royal transition-colors">Analytics</a></li>
+            <ul className="flex space-x-2 text-sm font-bold">
+              <li>
+                <Link to="/" className="px-4 py-2 rounded-lg border-2 border-transparent hover:border-ink-black hover:bg-sun-yellow transition-all">
+                  Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link to="/analytics" className="px-4 py-2 rounded-lg border-2 border-transparent hover:border-ink-black hover:bg-sun-yellow transition-all">
+                  Analytics
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>
@@ -30,23 +41,26 @@ function App() {
             </>
           } />
           <Route path="/session/:sessionId" element={<SessionDetail />} />
+          <Route path="/analytics" element={<Analytics />} />
         </Routes>
       </main>
 
-      <footer className="bg-kingfisher-midnight text-white py-12">
+      {/* Footer - Brutal Style */}
+      <footer className="bg-ink-black text-white py-12 border-t-4 border-sun-yellow">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h4 className="font-display font-bold text-lg mb-4">About</h4>
-            <p className="text-slate-400 text-sm leading-relaxed">
+            <h4 className="font-display font-bold text-2xl mb-4 text-sun-yellow">About</h4>
+            <p className="text-white/70 text-sm leading-relaxed font-body">
               Advanced acoustic monitoring for biodiversity conservation.
-              Powered by BirdNET and React.
+              Powered by BirdNET AI and React.
             </p>
           </div>
-          <div>
-            {/* Spacers */}
+          <div className="flex items-center justify-center">
+            <Bird className="w-20 h-20 text-white/20" />
           </div>
           <div className="text-right">
-            <p className="text-slate-500 text-sm">© 2024 Project Kingfisher</p>
+            <p className="text-white/50 text-sm font-body">© 2024 Project AvianNet</p>
+            <p className="text-sun-yellow font-display text-lg mt-2">🐦 San Sebastian Theme</p>
           </div>
         </div>
       </footer>

@@ -1,9 +1,8 @@
 import { ButtonHTMLAttributes, forwardRef } from 'react';
 import { cn } from '../../lib/utils';
-// import { motion } from 'framer-motion';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'outline';
+    variant?: 'primary' | 'secondary' | 'outline' | 'coral';
     size?: 'sm' | 'md' | 'lg';
 }
 
@@ -13,20 +12,26 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             <button
                 ref={ref}
                 className={cn(
-                    "relative font-bold uppercase tracking-wider transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:pointer-events-none hover:scale-105 active:scale-95",
+                    "relative inline-flex items-center justify-center gap-2 font-bold uppercase tracking-wider",
+                    "border-3 border-ink-black rounded-lg",
+                    "shadow-brutal transition-all duration-200",
+                    "hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutal-hover",
+                    "active:translate-x-0 active:translate-y-0 active:shadow-none",
+                    "focus:outline-none disabled:opacity-50 disabled:pointer-events-none",
 
                     // Variants
-                    variant === 'primary' && "btn-primary", // Defined in index.css
-                    variant === 'secondary' && "bg-kingfisher-sky text-white hover:bg-kingfisher-royal py-3 px-6",
-                    variant === 'outline' && "border-2 border-kingfisher-royal text-kingfisher-royal hover:bg-kingfisher-royal hover:text-white py-2 px-6",
+                    variant === 'primary' && "bg-sun-yellow text-ink-black",
+                    variant === 'secondary' && "bg-coastal-blue text-white",
+                    variant === 'coral' && "bg-sun-coral text-white",
+                    variant === 'outline' && "bg-transparent border-ink-black text-ink-black hover:bg-ink-black hover:text-white",
 
                     // Sizes
                     size === 'sm' && "text-xs py-2 px-4",
+                    size === 'md' && "text-sm py-3 px-6",
                     size === 'lg' && "text-lg py-4 px-8",
 
                     className
                 )}
-                style={variant === 'secondary' ? { clipPath: 'polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)' } : {}}
                 {...props}
             >
                 {children}

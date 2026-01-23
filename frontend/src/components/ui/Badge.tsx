@@ -2,22 +2,24 @@ import { HTMLAttributes } from 'react';
 import { cn } from '../../lib/utils';
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-    variant?: 'success' | 'warning' | 'neutral';
+    variant?: 'success' | 'warning' | 'neutral' | 'info';
 }
 
 export function Badge({ className, variant = 'neutral', ...props }: BadgeProps) {
     return (
         <span
             className={cn(
-                "inline-flex items-center px-3 py-1 font-bold text-xs uppercase tracking-widest",
-                "bg-kingfisher-midnight text-white", // Default base
+                "inline-flex items-center px-3 py-1 font-bold text-xs uppercase tracking-wider",
+                "border-2 border-ink-black rounded-full shadow-[2px_2px_0px_0px_#1a1a1a]",
 
-                variant === 'success' && "bg-kingfisher-turquoise",
-                variant === 'warning' && "bg-kingfisher-coral",
+                // Variants
+                variant === 'neutral' && "bg-sand-light text-ink-black",
+                variant === 'success' && "bg-green-400 text-ink-black",
+                variant === 'warning' && "bg-sun-yellow text-ink-black",
+                variant === 'info' && "bg-coastal-blue text-white",
 
                 className
             )}
-            style={{ clipPath: 'polygon(10% 0, 100% 0, 90% 100%, 0% 100%)' }}
             {...props}
         />
     );

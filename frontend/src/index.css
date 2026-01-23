@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap');
+/* San Sebastian Retro Coastal Theme */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Passion+One:wght@400;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,31 +7,84 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-kingfisher-midnight font-sans antialiased;
-    background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
-    background-size: 24px 24px;
+    @apply bg-coastal-blue text-ink-black font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display uppercase tracking-wide;
   }
 }
 
 @layer components {
+
+  /* Brutal Button - Primary */
+  .btn-brutal {
+    @apply inline-flex items-center justify-center gap-2 bg-sun-yellow text-ink-black font-bold py-3 px-6 border-3 border-ink-black rounded-lg shadow-brutal transition-all duration-200 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutal-hover active:translate-x-0 active:translate-y-0 active:shadow-none;
+  }
+
+  .btn-brutal-blue {
+    @apply btn-brutal bg-coastal-blue text-white border-ink-black;
+  }
+
+  .btn-brutal-coral {
+    @apply btn-brutal bg-sun-coral text-white border-ink-black;
+  }
+
+  /* Brutal Card */
+  .card-brutal {
+    @apply bg-sand-light p-6 border-3 border-ink-black rounded-xl shadow-brutal-lg transition-all duration-200 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-brutal-xl;
+  }
+
+  /* Brutal Badge */
+  .badge-brutal {
+    @apply inline-flex items-center px-3 py-1 text-xs font-bold uppercase tracking-wider border-2 border-ink-black rounded-full shadow-[2px_2px_0px_0px_#1a1a1a];
+  }
+
+  .badge-brutal-success {
+    @apply badge-brutal bg-green-400 text-ink-black;
+  }
+
+  .badge-brutal-warning {
+    @apply badge-brutal bg-sun-yellow text-ink-black;
+  }
+
+  .badge-brutal-info {
+    @apply badge-brutal bg-coastal-blue text-white;
+  }
+
+  /* Content Container with cream background */
+  .content-container {
+    @apply bg-sand-light border-3 border-ink-black rounded-2xl p-6 shadow-brutal-lg;
+  }
+
+  /* Wave Divider */
+  .wave-divider {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100'%3E%3Cpath fill='%23FFF8E7' d='M0,64L80,58.7C160,53,320,43,480,48C640,53,800,75,960,74.7C1120,75,1280,53,1360,42.7L1440,32L1440,100L1360,100C1280,100,1120,100,960,100C800,100,640,100,480,100C320,100,160,100,80,100L0,100Z'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100px;
+    width: 100%;
+  }
+
+  /* Legacy compatibility */
   .btn-primary {
-    @apply text-white font-bold py-3 px-6 transition-all duration-300 hover:translate-y-[-2px] hover:drop-shadow-sharp;
-    background: linear-gradient(to right, #FF6B35, #FF9E75);
-    /* Hardcoded kingfisher-coral to kingfisher-peach */
-    clip-path: polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%);
+    @apply btn-brutal;
   }
 
   .card-geometric {
-    @apply bg-white p-6 relative transition-all duration-300 hover:drop-shadow-sharp;
-    clip-path: polygon(0 0, 100% 0, 100% 85%, 92% 100%, 0 100%);
-  }
-
-  .card-geometric-inverse {
-    @apply bg-white p-6 relative transition-all duration-300 hover:drop-shadow-sharp;
-    clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%, 0 15%);
+    @apply card-brutal;
   }
 }
 
-.clip-polygon {
-  clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
+/* Custom utility for retro text styling */
+.text-retro-shadow {
+  text-shadow: 3px 3px 0px #1a1a1a;
+}
+
+.text-retro-outline {
+  -webkit-text-stroke: 2px #1a1a1a;
+  paint-order: stroke fill;
 }

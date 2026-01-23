@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import STORAGE_DIR
 from .database import init_db
-from .routers import upload, detections
+from .routers import upload, detections, analytics
 
 app = FastAPI(title="Bird Classification API", version="1.0.0")
 
@@ -23,6 +23,7 @@ app.mount("/storage", StaticFiles(directory=STORAGE_DIR), name="storage")
 # Include routers
 app.include_router(upload.router)
 app.include_router(detections.router)
+app.include_router(analytics.router)
 
 # Initialize database on startup
 @app.on_event("startup")
