@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 import shutil
 import os
 import sqlite3
@@ -16,6 +17,15 @@ from birdnetlib.analyzer import Analyzer
 from typing import Optional
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # 1. Setup Storage
 os.makedirs("storage", exist_ok=True)
@@ -165,6 +175,7 @@ async def receive_data(
     c = conn.cursor()
     k = 0
     for bird in detections:
+        
         start_seconds = bird.get('start_time', 0.0)
         species_name = bird.get('common_name') or bird.get('label', 'Unknown Bird')
         confidence_score = bird.get('confidence', 0.0)
@@ -261,11 +272,27 @@ async def receive_data(
             ),
         )
         print(f"✅ Found {bird['common_name']} at {exact_time}")
+        
 
     conn.commit()
     conn.close()
 
     return {"status": "success", "birds_found": len(detections)}
+
+
+@app.get("/api/detections")
+def get_detections():
+    conn = sqlite3.connect("birds.db")
+    conn.row_factory = sqlite3.Row  # Allow accessing columns by name
+    c = conn.cursor()
+    c.execute("SELECT * FROM detections ORDER BY timestamp DESC")
+    rows = c.fetchall()
+    conn.close()
+    
+    # Convert to list of dicts
+    detections = [dict(row) for row in rows]
+    return detections
+
 
 
 @app.get("/download-excel")

@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-kingfisher-midnight font-sans antialiased;
+    background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply text-white font-bold py-3 px-6 transition-all duration-300 hover:translate-y-[-2px] hover:drop-shadow-sharp;
+    background: linear-gradient(to right, #FF6B35, #FF9E75);
+    /* Hardcoded kingfisher-coral to kingfisher-peach */
+    clip-path: polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%);
+  }
+
+  .card-geometric {
+    @apply bg-white p-6 relative transition-all duration-300 hover:drop-shadow-sharp;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 92% 100%, 0 100%);
+  }
+
+  .card-geometric-inverse {
+    @apply bg-white p-6 relative transition-all duration-300 hover:drop-shadow-sharp;
+    clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%, 0 15%);
+  }
+}
+
+.clip-polygon {
+  clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
+}
