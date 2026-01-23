@@ -171,12 +171,24 @@ export function SessionDetail() {
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm" onClick={() => setSelectedBird(null)}>
                     <div className="relative max-w-5xl w-full bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]" onClick={e => e.stopPropagation()}>
 
-                        {/* LEFT COLUMN: Large Image */}
-                        <div className="w-full md:w-2/3 bg-slate-900 flex items-center justify-center p-6 relative overflow-hidden">
+                        {/* LEFT COLUMN: Bird Photo + Spectrogram */}
+                        <div className="w-full md:w-2/3 bg-slate-900 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+                            {/* Bird Photo from Wikipedia (if available) */}
+                            {selectedBird.bird_photo_url && (
+                                <div className="mb-4 flex flex-col items-center">
+                                    <img
+                                        src={selectedBird.bird_photo_url}
+                                        alt={selectedBird.species}
+                                        className="w-32 h-32 object-cover rounded-full border-4 border-white shadow-xl"
+                                    />
+                                    <span className="text-white/70 text-xs mt-2">Photo from Wikipedia</span>
+                                </div>
+                            )}
+                            {/* Spectrogram */}
                             <img
                                 src={selectedBird.single_image_url}
-                                alt={selectedBird.species}
-                                className="max-w-full max-h-[80vh] object-contain shadow-2xl rounded-lg"
+                                alt={`${selectedBird.species} spectrogram`}
+                                className="max-w-full max-h-[60vh] object-contain shadow-2xl rounded-lg"
                             />
                             <button
                                 onClick={() => setSelectedBird(null)}

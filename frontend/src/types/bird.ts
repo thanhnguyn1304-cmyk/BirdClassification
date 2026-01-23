@@ -9,4 +9,5 @@ export interface BirdDetection {
     single_audio_url: string;
     image_url: string;
     single_image_url: string;
+    bird_photo_url: string | null;
 }

@@ -12,6 +12,7 @@ from ..config import STORAGE_DIR, DATABASE_PATH
 from ..services.analyzer import analyzer
 from ..services.spectrogram import generate_session_spectrogram, generate_single_spectrogram
 from ..services.audio import generate_single_audio
+from ..services.bird_images import get_bird_photo
 
 
 router = APIRouter()
@@ -79,14 +80,17 @@ async def receive_data(
 
         generate_single_audio(audio_path, single_audio_path, bird["start_time"], bird["end_time"])
 
+        # Fetch bird photo (with caching - only calls API if not already stored)
+        bird_photo_url = get_bird_photo(species_name)
+
         # Exact Time Calculation Logic
         exact_time = start_time_obj + timedelta(seconds=start_seconds)
 
         c.execute(
             """
             INSERT INTO detections 
-            (timestamp, lat, lon, species, confidence, audio_url, single_audio_url, image_url, single_image_url) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (timestamp, lat, lon, species, confidence, audio_url, single_audio_url, image_url, single_image_url, bird_photo_url) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
             (
                 exact_time,
@@ -98,6 +102,7 @@ async def receive_data(
                 f"/storage/{single_audio_filename}",
                 f"/storage/{image_filename}",
                 f"/storage/{single_image_filename}",
+                bird_photo_url,
             ),
         )
         print(f"✅ Found {bird['common_name']} at {exact_time}")
@@ -107,3 +112,4 @@ async def receive_data(
     conn.close()
 
     return {"status": "success", "birds_found": len(detections)}
+

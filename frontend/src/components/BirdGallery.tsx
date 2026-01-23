@@ -30,13 +30,14 @@ export function BirdGallery() {
         return () => clearInterval(interval);
     }, []);
 
-    // Group by Species Logic
+    // Group by Species Logic - now includes bird_photo_url from Wikipedia
     const speciesGroups = detections.reduce((acc, bird) => {
         if (!acc[bird.species]) {
             acc[bird.species] = {
                 count: 0,
                 lastSeen: bird.timestamp,
-                image: bird.single_image_url
+                image: bird.single_image_url,
+                birdPhoto: bird.bird_photo_url
             };
         }
         acc[bird.species].count += 1;
@@ -44,8 +45,12 @@ export function BirdGallery() {
             acc[bird.species].lastSeen = bird.timestamp;
             acc[bird.species].image = bird.single_image_url;
         }
+        // Prefer bird_photo_url if available
+        if (bird.bird_photo_url && !acc[bird.species].birdPhoto) {
+            acc[bird.species].birdPhoto = bird.bird_photo_url;
+        }
         return acc;
-    }, {} as Record<string, { count: number; lastSeen: string; image: string }>);
+    }, {} as Record<string, { count: number; lastSeen: string; image: string; birdPhoto: string | null }>);
 
     // Group by Session (Image URL) Logic
     const sessionGroups = detections.reduce((acc, bird) => {
@@ -174,12 +179,16 @@ export function BirdGallery() {
                                 </div>
                             ))}
 
-                        {/* SPECIES VIEW */}
+                        {/* SPECIES VIEW - Uses Wikipedia bird photos when available */}
                         {activeTab === 'species' && Object.entries(speciesGroups).map(([species, data]) => (
                             <div key={species}>
                                 <Card className="h-full flex flex-col text-center">
-                                    <div className="w-28 h-28 mx-auto rounded-full overflow-hidden border-4 border-ink-black shadow-brutal mb-6">
-                                        <img src={data.image} alt={species} className="w-full h-full object-cover" />
+                                    <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-ink-black shadow-brutal mb-6 bg-white">
+                                        <img
+                                            src={data.birdPhoto || data.image}
+                                            alt={species}
+                                            className="w-full h-full object-cover"
+                                        />
                                     </div>
                                     <h3 className="text-2xl font-display font-bold text-ink-black mb-2">{species}</h3>
                                     <div className="flex justify-center items-center gap-2 mb-6">

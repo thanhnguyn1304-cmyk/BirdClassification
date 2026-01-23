@@ -15,8 +15,16 @@ def init_db():
                   audio_url TEXT,  
                   single_audio_url TEXT,
                   image_url TEXT,
-                  single_image_url TEXT)"""
+                  single_image_url TEXT,
+                  bird_photo_url TEXT)"""
     )
+    
+    # Add column if it doesn't exist (for existing databases)
+    try:
+        c.execute("ALTER TABLE detections ADD COLUMN bird_photo_url TEXT")
+    except sqlite3.OperationalError:
+        pass  # Column already exists
+        
     conn.commit()
     conn.close()
 
