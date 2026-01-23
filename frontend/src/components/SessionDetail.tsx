@@ -10,7 +10,6 @@ import { Button } from './ui/Button';
 export function SessionDetail() {
     const { sessionId } = useParams<{ sessionId: string }>();
     const navigate = useNavigate();
-    const [allDetections, setAllDetections] = useState<BirdDetection[]>([]);
     const [sessionDetections, setSessionDetections] = useState<BirdDetection[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedBird, setSelectedBird] = useState<BirdDetection | null>(null);
@@ -25,7 +24,6 @@ export function SessionDetail() {
                 // But for now we fetch all and filter client-side as per plan
                 const response = await axios.get('/api/detections');
                 const data: BirdDetection[] = response.data;
-                setAllDetections(data);
 
                 if (masterImageUrl) {
                     const filtered = data.filter(d => d.image_url === masterImageUrl);
@@ -92,6 +90,25 @@ export function SessionDetail() {
                         className="w-full h-auto max-h-[500px] object-contain mx-auto"
                     />
                 </div>
+
+                {/* Full-Length Audio Player */}
+                {sessionDetections.length > 0 && sessionDetections[0].audio_url && (
+                    <div className="mt-6 bg-slate-100 rounded-xl p-6 border border-slate-200">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-kingfisher-royal rounded-lg text-white">
+                                <Music className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-kingfisher-midnight">Full Recording</h4>
+                                <p className="text-sm text-slate-500">Complete audio session</p>
+                            </div>
+                        </div>
+                        <audio controls className="w-full rounded-lg">
+                            <source src={sessionDetections[0].audio_url} type="audio/wav" />
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                )}
             </div>
 
             {/* Detections Grid */}
@@ -135,7 +152,7 @@ export function SessionDetail() {
 
                             <div className="mt-3 pt-3 border-t border-slate-100">
                                 <a
-                                    href={bird.audio_url}
+                                    href={bird.single_audio_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-2 text-kingfisher-royal font-bold text-xs hover:underline"
@@ -246,13 +263,13 @@ export function SessionDetail() {
                             {/* Footer Actions */}
                             <div className="mt-8 pt-6 border-t border-slate-100">
                                 <a
-                                    href={selectedBird.audio_url}
+                                    href={selectedBird.single_audio_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex w-full items-center justify-center gap-2 bg-kingfisher-royal text-white px-6 py-4 rounded-xl font-bold hover:bg-kingfisher-midnight transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                                 >
                                     <Music className="w-5 h-5" />
-                                    Play Audio Recording
+                                    Play Audio Segment
                                 </a>
                                 <p className="text-center text-xs text-slate-400 mt-4">
                                     Detection ID: {selectedBird.id}
