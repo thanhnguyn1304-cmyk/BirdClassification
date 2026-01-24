@@ -1,8 +1,8 @@
-import { HTMLAttributes, forwardRef } from 'react';
+import { type HTMLAttributes, forwardRef } from 'react';
 import { cn } from '../../lib/utils';
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
-    variant?: 'default' | 'brutal' | 'glass';
+    variant?: 'default' | 'brutal' | 'glass' | 'custom';
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
@@ -16,6 +16,8 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
                     variant === 'default' && "bg-sand-light p-6 border-3 border-ink-black rounded-xl shadow-brutal-lg transition-all duration-200 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-brutal-xl",
                     variant === 'brutal' && "bg-sand-light p-6 border-3 border-ink-black rounded-xl shadow-brutal-lg transition-all duration-200 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-brutal-xl",
                     variant === 'glass' && "bg-white/90 backdrop-blur-md p-6 border-2 border-ink-black/20 rounded-xl shadow-lg",
+                    // Custom variant - no background, allows full customization
+                    variant === 'custom' && "border-3 border-ink-black rounded-xl shadow-brutal-lg transition-all duration-200",
                     className
                 )}
                 {...props}

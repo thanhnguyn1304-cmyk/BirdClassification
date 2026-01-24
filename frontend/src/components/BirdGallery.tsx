@@ -1,56 +1,47 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import type { BirdDetection } from '../types/bird';
+import type { BirdDetection, SpeciesInfo } from '../types/bird';
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
-import { Calendar, Layers, Grid, Maximize2, Bird } from 'lucide-react';
+import { Calendar, Layers, Grid, Maximize2, Bird, MapPin, X, Clock, Activity } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export function BirdGallery() {
     const [detections, setDetections] = useState<BirdDetection[]>([]);
+    const [speciesList, setSpeciesList] = useState<SpeciesInfo[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'sessions' | 'species'>('sessions');
+    const [selectedSpecies, setSelectedSpecies] = useState<SpeciesInfo | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchDetections = async () => {
+        const fetchData = async () => {
             try {
-                const response = await axios.get('/api/detections');
-                setDetections(response.data);
+                const [detectionsRes, speciesRes] = await Promise.all([
+                    axios.get('/api/detections'),
+                    axios.get('/api/species-summary')
+                ]);
+                setDetections(detectionsRes.data);
+                setSpeciesList(speciesRes.data);
             } catch (error) {
-                console.error("Failed to fetch detections:", error);
+                console.error("Failed to fetch data:", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchDetections();
-        const interval = setInterval(fetchDetections, 10000);
+        fetchData();
+        const interval = setInterval(fetchData, 10000);
         return () => clearInterval(interval);
     }, []);
 
-    // Group by Species Logic - now includes bird_photo_url from Wikipedia
-    const speciesGroups = detections.reduce((acc, bird) => {
-        if (!acc[bird.species]) {
-            acc[bird.species] = {
-                count: 0,
-                lastSeen: bird.timestamp,
-                image: bird.single_image_url,
-                birdPhoto: bird.bird_photo_url
-            };
-        }
-        acc[bird.species].count += 1;
-        if (new Date(bird.timestamp) > new Date(acc[bird.species].lastSeen)) {
-            acc[bird.species].lastSeen = bird.timestamp;
-            acc[bird.species].image = bird.single_image_url;
-        }
-        // Prefer bird_photo_url if available
-        if (bird.bird_photo_url && !acc[bird.species].birdPhoto) {
-            acc[bird.species].birdPhoto = bird.bird_photo_url;
-        }
-        return acc;
-    }, {} as Record<string, { count: number; lastSeen: string; image: string; birdPhoto: string | null }>);
+    // Get detections for a specific species (for the modal)
+    const getDetectionsForSpecies = (speciesName: string) => {
+        return detections
+            .filter(d => d.species === speciesName)
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    };
 
     // Group by Session (Image URL) Logic
     const sessionGroups = detections.reduce((acc, bird) => {
@@ -81,7 +72,7 @@ export function BirdGallery() {
     return (
         <section id="gallery" className="bg-sand-light py-20">
             <div className="max-w-7xl mx-auto px-6">
-                {/* Header & Tabs - Brutal Style */}
+                {/* Header & Tabs */}
                 <div className="flex flex-col md:flex-row items-end justify-between mb-10 pb-6 gap-4">
                     <div>
                         <h2 className="text-4xl md:text-5xl font-display font-bold text-ink-black">
@@ -90,7 +81,7 @@ export function BirdGallery() {
                         <p className="text-ink-gray mt-2 font-body">Live stream of identified bird calls</p>
                     </div>
 
-                    {/* Tab Switcher - Brutal Style */}
+                    {/* Tab Switcher */}
                     <div className="flex bg-white border-3 border-ink-black rounded-xl p-1 shadow-brutal">
                         <button
                             onClick={() => setActiveTab('sessions')}
@@ -179,24 +170,27 @@ export function BirdGallery() {
                                 </div>
                             ))}
 
-                        {/* SPECIES VIEW - Uses Wikipedia bird photos when available */}
-                        {activeTab === 'species' && Object.entries(speciesGroups).map(([species, data]) => (
-                            <div key={species}>
-                                <Card className="h-full flex flex-col text-center">
-                                    <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-ink-black shadow-brutal mb-6 bg-white">
+                        {/* SPECIES VIEW - Simple Cards */}
+                        {activeTab === 'species' && speciesList.map((species) => (
+                            <div key={species.name}>
+                                <Card
+                                    className="h-full flex flex-col text-center cursor-pointer"
+                                    onClick={() => setSelectedSpecies(species)}
+                                >
+                                    <div className="w-28 h-28 mx-auto rounded-full overflow-hidden border-4 border-ink-black shadow-brutal mb-4 bg-white">
                                         <img
-                                            src={data.birdPhoto || data.image}
-                                            alt={species}
+                                            src={species.image_url || '/placeholder-bird.png'}
+                                            alt={species.name}
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
-                                    <h3 className="text-2xl font-display font-bold text-ink-black mb-2">{species}</h3>
-                                    <div className="flex justify-center items-center gap-2 mb-6">
-                                        <span className="text-5xl font-display font-bold text-coastal-blue">{data.count}</span>
+                                    <h3 className="text-xl font-display font-bold text-ink-black mb-2">{species.name}</h3>
+                                    <div className="flex justify-center items-center gap-2 mb-4">
+                                        <span className="text-4xl font-display font-bold text-coastal-blue">{species.detection_count}</span>
                                         <span className="text-ink-gray text-sm uppercase tracking-wide font-bold">Detections</span>
                                     </div>
-                                    <div className="mt-auto text-sm text-ink-gray border-t-2 border-ink-black/20 pt-4 font-body">
-                                        Last seen: {new Date(data.lastSeen).toLocaleDateString()}
+                                    <div className="mt-auto text-sm text-ink-gray border-t-2 border-ink-black/10 pt-3 font-body">
+                                        Last seen: {new Date(species.last_seen).toLocaleDateString()}
                                     </div>
                                 </Card>
                             </div>
@@ -204,6 +198,129 @@ export function BirdGallery() {
                     </div>
                 )}
             </div>
+
+            {/* SPECIES DETAIL MODAL */}
+            {selectedSpecies && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+                    onClick={() => setSelectedSpecies(null)}
+                >
+                    <div
+                        className="relative max-w-4xl w-full bg-sand-light border-4 border-ink-black rounded-2xl overflow-hidden shadow-brutal-xl max-h-[90vh] flex flex-col"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="bg-coastal-blue p-6 text-white relative">
+                            <button
+                                onClick={() => setSelectedSpecies(null)}
+                                className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+
+                            <div className="flex items-center gap-6">
+                                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white flex-shrink-0">
+                                    <img
+                                        src={selectedSpecies.image_url || '/placeholder-bird.png'}
+                                        alt={selectedSpecies.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div>
+                                    <h2 className="text-3xl font-display font-bold">{selectedSpecies.name}</h2>
+                                    {selectedSpecies.region && (
+                                        <div className="flex items-center gap-2 mt-2 text-white/80">
+                                            <MapPin className="w-4 h-4" />
+                                            <span>{selectedSpecies.region}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 overflow-y-auto p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Left Column - Info */}
+                                <div>
+                                    {/* Description */}
+                                    {selectedSpecies.description && (
+                                        <div className="mb-6">
+                                            <h3 className="text-lg font-display font-bold text-ink-black mb-2">About</h3>
+                                            <p className="text-ink-gray font-body text-sm leading-relaxed">
+                                                {selectedSpecies.description}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Stats */}
+                                    <div className="bg-white border-2 border-ink-black rounded-xl p-4 shadow-brutal">
+                                        <h3 className="text-lg font-display font-bold text-ink-black mb-4">Statistics</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="text-center">
+                                                <div className="text-3xl font-display font-bold text-coastal-blue">{selectedSpecies.detection_count}</div>
+                                                <div className="text-xs text-ink-gray uppercase">Total Detections</div>
+                                            </div>
+                                            <div className="text-center">
+                                                <div className="text-3xl font-display font-bold text-green-600">{selectedSpecies.avg_confidence}%</div>
+                                                <div className="text-xs text-ink-gray uppercase">Avg Confidence</div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 pt-4 border-t border-ink-black/10 text-sm text-ink-gray">
+                                            <div className="flex justify-between">
+                                                <span>First detected:</span>
+                                                <span className="font-bold">{new Date(selectedSpecies.first_seen).toLocaleDateString()}</span>
+                                            </div>
+                                            <div className="flex justify-between mt-1">
+                                                <span>Last detected:</span>
+                                                <span className="font-bold">{new Date(selectedSpecies.last_seen).toLocaleDateString()}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Right Column - Activity Log */}
+                                <div>
+                                    <div className="bg-white border-2 border-ink-black rounded-xl p-4 shadow-brutal">
+                                        <h3 className="text-lg font-display font-bold text-ink-black mb-4 flex items-center gap-2">
+                                            <Activity className="w-5 h-5 text-coastal-blue" />
+                                            Activity Log
+                                        </h3>
+                                        <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                                            {getDetectionsForSpecies(selectedSpecies.name).map((detection, idx) => (
+                                                <div key={detection.id || idx} className="flex items-start gap-3 p-3 bg-sand-light rounded-lg border border-ink-black/10">
+                                                    <div className="p-2 bg-coastal-blue/10 rounded-lg">
+                                                        <Clock className="w-4 h-4 text-coastal-blue" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="text-sm font-bold text-ink-black">
+                                                            {new Date(detection.timestamp).toLocaleString()}
+                                                        </div>
+                                                        <div className="text-xs text-ink-gray mt-1">
+                                                            Confidence: <span className={detection.confidence > 0.8 ? "text-green-600 font-bold" : "text-amber-600 font-bold"}>
+                                                                {Math.round(detection.confidence * 100)}%
+                                                            </span>
+                                                        </div>
+                                                        {detection.lat && detection.lon && (
+                                                            <div className="flex items-center gap-1 text-xs text-ink-gray mt-1">
+                                                                <MapPin className="w-3 h-3" />
+                                                                <span>{detection.lat.toFixed(4)}, {detection.lon.toFixed(4)}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <Badge variant={detection.confidence > 0.8 ? "success" : "warning"} className="text-xs">
+                                                        {Math.round(detection.confidence * 100)}%
+                                                    </Badge>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }
