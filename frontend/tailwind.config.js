@@ -4,6 +4,16 @@ export default {
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
     ],
+    // Safelist ensures these dynamically-used gradient classes are never purged
+    safelist: [
+        'bg-gradient-to-br',
+        'from-coastal-blue', 'to-coastal-deepblue',
+        'from-emerald-500', 'to-emerald-600',
+        'from-sun-orange', 'to-sun-coral',
+        'from-purple-500', 'to-purple-600',
+        'from-green-500', 'to-green-600',
+        'from-amber-500', 'to-amber-600',
+    ],
     theme: {
         extend: {
             colors: {
