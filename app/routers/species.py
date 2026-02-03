@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from typing import List, Dict, Any
 
 from ..database import get_db_connection
-from ..services.bird_images import get_species_info
+
 
 router = APIRouter()
 
@@ -22,15 +22,18 @@ def get_all_species() -> List[Dict[str, Any]]:
 @router.get("/api/species/{species_name}")
 def get_species_by_name(species_name: str) -> Dict[str, Any]:
     """
-    Get species info by name. 
-    If not in cache, fetches from Wikipedia and caches it.
+    Get species info by name from the database cache.
     """
-    info = get_species_info(species_name)
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("SELECT * FROM species WHERE name = ?", (species_name,))
+    row = c.fetchone()
+    conn.close()
     
-    if not info:
+    if not row:
         raise HTTPException(status_code=404, detail=f"Species '{species_name}' not found")
     
-    return info
+    return dict(row)
 
 
 @router.get("/api/species-summary")

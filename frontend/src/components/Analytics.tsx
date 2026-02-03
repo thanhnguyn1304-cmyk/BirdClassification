@@ -167,53 +167,65 @@ export function Analytics() {
                 {/* Summary Cards */}
                 {summary && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                        <Card variant="custom" className="p-6 bg-gradient-to-br from-coastal-blue to-coastal-deepblue text-white">
+                        <div
+                            className="p-6 text-white border-3 border-ink-black rounded-xl shadow-brutal-lg"
+                            style={{ background: 'linear-gradient(to bottom right, #007AFF, #0056B3)' }}
+                        >
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-white/20 rounded-xl">
                                     <Bird className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="text-blue-100 text-sm font-medium">Total Detections</p>
+                                    <p className="text-white/80 text-sm font-medium">Total Detections</p>
                                     <p className="text-3xl font-bold">{summary.total_detections}</p>
                                 </div>
                             </div>
-                        </Card>
+                        </div>
 
-                        <Card variant="custom" className="p-6 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
+                        <div
+                            className="p-6 text-white border-3 border-ink-black rounded-xl shadow-brutal-lg"
+                            style={{ background: 'linear-gradient(to bottom right, #10b981, #059669)' }}
+                        >
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-white/20 rounded-xl">
                                     <Activity className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="text-emerald-100 text-sm font-medium">Unique Species</p>
+                                    <p className="text-white/80 text-sm font-medium">Unique Species</p>
                                     <p className="text-3xl font-bold">{summary.unique_species}</p>
                                 </div>
                             </div>
-                        </Card>
+                        </div>
 
-                        <Card variant="custom" className="p-6 bg-gradient-to-br from-sun-orange to-sun-coral text-white">
+                        <div
+                            className="p-6 text-white border-3 border-ink-black rounded-xl shadow-brutal-lg"
+                            style={{ background: 'linear-gradient(to bottom right, #FF9500, #FF453A)' }}
+                        >
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-white/20 rounded-xl">
                                     <Target className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="text-orange-100 text-sm font-medium">Avg Confidence</p>
+                                    <p className="text-white/80 text-sm font-medium">Avg Confidence</p>
                                     <p className="text-3xl font-bold">{summary.avg_confidence}%</p>
                                 </div>
                             </div>
-                        </Card>
+                        </div>
 
-                        <Card variant="custom" className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+                        <div
+                            className="p-6 text-white border-3 border-ink-black rounded-xl shadow-brutal-lg"
+                            style={{ background: 'linear-gradient(to bottom right, #a855f7, #9333ea)' }}
+                        >
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-white/20 rounded-xl">
                                     <Clock className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="text-purple-100 text-sm font-medium">Most Recent</p>
+                                    <p className="text-white/80 text-sm font-medium">Most Recent</p>
                                     <p className="text-lg font-bold truncate">{summary.most_recent.species || 'N/A'}</p>
                                 </div>
                             </div>
-                        </Card>
+                        </div>
                     </div>
                 )}
 

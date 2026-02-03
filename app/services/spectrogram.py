@@ -1,4 +1,6 @@
 import os
+import matplotlib
+matplotlib.use('Agg') # FORCE HEADLESS MODE (Fixes Threading Crash)
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import librosa
