@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 my_forest_audio/
 *.png
+storage/

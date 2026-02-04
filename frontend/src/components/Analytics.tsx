@@ -43,57 +43,14 @@ interface ConfidenceData {
     count: number;
 }
 
-// Population safety analysis based on hourly activity
-function analyzePopulationSafety(hourlyData: HourlyData[]) {
-    if (hourlyData.length === 0) return null;
-
-    const totalActivity = hourlyData.reduce((sum, h) => sum + h.count, 0);
-    const avgActivity = totalActivity / hourlyData.length;
-
-    // Find peak hours (above average)
-    const peakHours = hourlyData.filter(h => h.count > avgActivity).map(h => h.hour);
-
-    // Find quiet hours (below half of average)
-    const quietHours = hourlyData.filter(h => h.count < avgActivity / 2).map(h => h.hour);
-
-    // Dawn chorus (5-8 AM)
-    const dawnActivity = hourlyData.filter(h => {
-        const hour = parseInt(h.hour);
-        return hour >= 5 && hour <= 8;
-    }).reduce((sum, h) => sum + h.count, 0);
-
-    // Calculate health score (0-100)
-    // More activity during dawn = healthier ecosystem
-    const dawnRatio = dawnActivity / Math.max(totalActivity, 1);
-    const diversityScore = peakHours.length >= 4 ? 30 : peakHours.length * 7;
-    const activityScore = Math.min(totalActivity / 10, 40);
-    const dawnScore = dawnRatio * 100 * 0.3;
-
-    const healthScore = Math.round(activityScore + diversityScore + dawnScore);
-
-    let status: 'healthy' | 'moderate' | 'concerning';
-    let message: string;
-
-    if (healthScore >= 70) {
-        status = 'healthy';
-        message = 'Strong bird activity indicates a healthy ecosystem with good biodiversity.';
-    } else if (healthScore >= 40) {
-        status = 'moderate';
-        message = 'Moderate bird activity. Consider monitoring for changes in habitat conditions.';
-    } else {
-        status = 'concerning';
-        message = 'Low bird activity detected. This may indicate environmental stressors.';
-    }
-
-    return {
-        healthScore,
-        status,
-        message,
-        peakHours: peakHours.slice(0, 4),
-        quietHours: quietHours.slice(0, 4),
-        dawnActivity,
-        totalActivity
-    };
+interface HealthData {
+    healthScore: number;
+    status: 'healthy' | 'moderate' | 'concerning';
+    message: string;
+    peakHours: string[];
+    quietHours: string[];
+    dawnActivity: number;
+    totalActivity: number;
 }
 
 export function Analytics() {
@@ -102,23 +59,27 @@ export function Analytics() {
     const [trendsData, setTrendsData] = useState<TrendData[]>([]);
     const [hourlyData, setHourlyData] = useState<HourlyData[]>([]);
     const [confidenceData, setConfidenceData] = useState<ConfidenceData[]>([]);
+    const [healthData, setHealthData] = useState<HealthData | null>(null);
     const [loading, setLoading] = useState(true);
     const [trendPeriod, setTrendPeriod] = useState<'day' | 'week' | 'month'>('day');
 
     useEffect(() => {
         const fetchAnalytics = async () => {
             try {
-                const [summaryRes, speciesRes, hourlyRes, confidenceRes] = await Promise.all([
+                // Don't set loading on background updates to avoid flicker
+                const [summaryRes, speciesRes, hourlyRes, confidenceRes, healthRes] = await Promise.all([
                     axios.get('/api/analytics/summary'),
                     axios.get('/api/analytics/species-distribution'),
                     axios.get('/api/analytics/hourly-activity'),
-                    axios.get('/api/analytics/confidence-distribution')
+                    axios.get('/api/analytics/confidence-distribution'),
+                    axios.get('/api/analytics/health')
                 ]);
 
                 setSummary(summaryRes.data);
                 setSpeciesData(speciesRes.data);
                 setHourlyData(hourlyRes.data);
                 setConfidenceData(confidenceRes.data);
+                setHealthData(healthRes.data);
             } catch (error) {
                 console.error("Failed to fetch analytics:", error);
             } finally {
@@ -126,7 +87,10 @@ export function Analytics() {
             }
         };
 
-        fetchAnalytics();
+        fetchAnalytics(); // Initial load
+        const interval = setInterval(fetchAnalytics, 5000); // Poll every 5s
+
+        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
@@ -138,10 +102,12 @@ export function Analytics() {
                 console.error("Failed to fetch trends:", error);
             }
         };
-        fetchTrends();
-    }, [trendPeriod]);
 
-    const populationAnalysis = analyzePopulationSafety(hourlyData);
+        fetchTrends();
+        const interval = setInterval(fetchTrends, 5000); // Poll every 5s
+
+        return () => clearInterval(interval);
+    }, [trendPeriod]);
 
     if (loading) {
         return (
@@ -230,7 +196,7 @@ export function Analytics() {
                 )}
 
                 {/* Population Safety Analysis */}
-                {populationAnalysis && (
+                {healthData && (
                     <Card className="p-6 mb-8">
                         <h3 className="text-xl font-display font-bold text-ink-black mb-6 flex items-center gap-2">
                             <Shield className="w-5 h-5 text-coastal-blue" />
@@ -240,51 +206,51 @@ export function Analytics() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* Health Score */}
                             <div className="text-center">
-                                <div className={`w-32 h-32 mx-auto rounded-full border-8 flex items-center justify-center mb-4 ${populationAnalysis.status === 'healthy' ? 'border-green-500 bg-green-50' :
-                                    populationAnalysis.status === 'moderate' ? 'border-amber-500 bg-amber-50' :
+                                <div className={`w-32 h-32 mx-auto rounded-full border-8 flex items-center justify-center mb-4 ${healthData.status === 'healthy' ? 'border-green-500 bg-green-50' :
+                                    healthData.status === 'moderate' ? 'border-amber-500 bg-amber-50' :
                                         'border-red-500 bg-red-50'
                                     }`}>
-                                    <span className={`text-4xl font-display font-bold ${populationAnalysis.status === 'healthy' ? 'text-green-600' :
-                                        populationAnalysis.status === 'moderate' ? 'text-amber-600' :
+                                    <span className={`text-4xl font-display font-bold ${healthData.status === 'healthy' ? 'text-green-600' :
+                                        healthData.status === 'moderate' ? 'text-amber-600' :
                                             'text-red-600'
                                         }`}>
-                                        {populationAnalysis.healthScore}
+                                        {healthData.healthScore}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-center gap-2">
-                                    {populationAnalysis.status === 'healthy' ? (
+                                    {healthData.status === 'healthy' ? (
                                         <CheckCircle className="w-5 h-5 text-green-500" />
-                                    ) : populationAnalysis.status === 'moderate' ? (
+                                    ) : healthData.status === 'moderate' ? (
                                         <AlertTriangle className="w-5 h-5 text-amber-500" />
                                     ) : (
                                         <AlertTriangle className="w-5 h-5 text-red-500" />
                                     )}
-                                    <span className={`font-bold uppercase text-sm ${populationAnalysis.status === 'healthy' ? 'text-green-600' :
-                                        populationAnalysis.status === 'moderate' ? 'text-amber-600' :
+                                    <span className={`font-bold uppercase text-sm ${healthData.status === 'healthy' ? 'text-green-600' :
+                                        healthData.status === 'moderate' ? 'text-amber-600' :
                                             'text-red-600'
                                         }`}>
-                                        {populationAnalysis.status}
+                                        {healthData.status}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Analysis Details */}
                             <div className="md:col-span-2">
-                                <p className="text-ink-gray font-body mb-4">{populationAnalysis.message}</p>
+                                <p className="text-ink-gray font-body mb-4">{healthData.message}</p>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-coastal-blue/10 rounded-lg p-4">
                                         <p className="text-sm font-bold text-coastal-blue mb-2">Peak Activity Hours</p>
                                         <p className="text-ink-black font-body">
-                                            {populationAnalysis.peakHours.length > 0
-                                                ? populationAnalysis.peakHours.join(', ')
+                                            {healthData.peakHours.length > 0
+                                                ? healthData.peakHours.join(', ')
                                                 : 'No peak hours identified'}
                                         </p>
                                     </div>
                                     <div className="bg-amber-500/10 rounded-lg p-4">
                                         <p className="text-sm font-bold text-amber-600 mb-2">Dawn Chorus Activity</p>
                                         <p className="text-ink-black font-body">
-                                            {populationAnalysis.dawnActivity} detections (5-8 AM)
+                                            {healthData.dawnActivity} detections (5-8 AM)
                                         </p>
                                     </div>
                                 </div>
@@ -390,7 +356,7 @@ export function Analytics() {
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={trendsData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                                <XAxis dataKey="date" tick={{ fontSize: 11 }} angle={-45} textAnchor="end" height={80} />
+                                <XAxis dataKey="date" tick={{ fontSize: 11 }} height={30} />
                                 <YAxis tick={{ fontSize: 12 }} />
                                 <Tooltip />
                                 <Legend />

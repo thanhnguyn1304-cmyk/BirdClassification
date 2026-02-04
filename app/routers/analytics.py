@@ -172,3 +172,79 @@ def get_confidence_distribution():
             buckets["95-100%"] += 1
     
     return [{"range": k, "count": v} for k, v in buckets.items()]
+
+
+@router.get("/health")
+def get_population_health():
+    """
+    Analyze population health based on activity patterns.
+    (Ported from Frontend)
+    """
+    # 1. Get Hourly Data (Internal Call)
+    hourly_data = get_hourly_activity()
+    
+    if not hourly_data:
+        return None
+
+    # 2. Calculate Stats
+    total_activity = sum(h["count"] for h in hourly_data)
+    if total_activity == 0:
+        return {
+            "healthScore": 0,
+            "status": "concerning",
+            "message": "No activity detected.",
+            "peakHours": [],
+            "quietHours": [],
+            "dawnActivity": 0,
+            "totalActivity": 0
+        }
+
+    avg_activity = total_activity / len(hourly_data)
+
+    # Peak Hours (> avg)
+    peak_hours = [h["hour"] for h in hourly_data if h["count"] > avg_activity]
+    
+    # Quiet Hours (< avg / 2)
+    quiet_hours = [h["hour"] for h in hourly_data if h["count"] < (avg_activity / 2)]
+
+    # Dawn Chorus (5-8 AM)
+    dawn_activity = 0
+    for h in hourly_data:
+        hour_int = int(h["hour"].split(":")[0])
+        if 5 <= hour_int <= 8:
+            dawn_activity += h["count"]
+
+    # 3. Calculate Score
+    # A. Dawn Ratio (30% weight) -> More dawn chorus is good
+    dawn_ratio = dawn_activity / max(total_activity, 1)
+    dawn_score = dawn_ratio * 100 * 0.3
+
+    # B. Diversity Score (Max 30) -> More peak hours means spread out activity
+    diversity_score = 30 if len(peak_hours) >= 4 else len(peak_hours) * 7
+
+    # C. Activity Score (Max 40) -> Raw volume of birds
+    activity_score = min(total_activity / 10, 40)
+
+    health_score = round(activity_score + diversity_score + dawn_score)
+
+    # 4. Determine Status
+    if health_score >= 70:
+        status = 'healthy'
+        message = 'Strong bird activity indicates a healthy ecosystem with good biodiversity.'
+    elif health_score >= 40:
+        status = 'moderate'
+        message = 'Moderate bird activity. Consider monitoring for changes in habitat conditions.'
+    else:
+        status = 'concerning'
+        message = 'Low bird activity detected. This may indicate environmental stressors.'
+
+    return {
+        "healthScore": health_score,
+        "status": status,
+        "message": message,
+        # Take just the simple hour string for frontend display
+        "peakHours": peak_hours[:4], 
+        "quietHours": quiet_hours[:4],
+        "dawnActivity": dawn_activity,
+        "totalActivity": total_activity
+    }
