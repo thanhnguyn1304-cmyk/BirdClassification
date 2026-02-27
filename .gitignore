@@ -3,3 +3,22 @@ __pycache__/
 *.pyc
 my_forest_audio/
 *.png
+storage/
+
+# Environment
+.env
+
+# Database
+*.db
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Test artifacts
+*.xlsx
+test_results.log

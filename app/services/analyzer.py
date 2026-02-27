@@ -1,5 +1,8 @@
 from birdnetlib.analyzer import Analyzer
+from ..logging_config import get_logger
 
-print("🦅 Loading BirdNET Model...")
+logger = get_logger("analyzer")
+
+logger.info("Loading BirdNET Model...")
 analyzer = Analyzer()
-print("✅ BirdNET Ready.")
+logger.info("BirdNET Model ready.")

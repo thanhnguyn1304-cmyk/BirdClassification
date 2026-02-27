@@ -1,9 +1,16 @@
 import os
+import matplotlib
+matplotlib.use('Agg')  # FORCE HEADLESS MODE (Fixes Threading Crash)
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import librosa
 import librosa.display
 import numpy as np
+
+from ..logging_config import get_logger
+
+logger = get_logger("spectrogram")
+
 
 def generate_session_spectrogram(audio_path: str, image_path: str, detections: list, recorded_at: str, lat, lon):
     """Generate the main session spectrogram with all detection boxes."""
@@ -64,10 +71,10 @@ def generate_session_spectrogram(audio_path: str, image_path: str, detections: l
         plt.tight_layout()
         plt.savefig(image_path, bbox_inches='tight', pad_inches=0.1, dpi=300)
         plt.close()
-        print(f"🎨 Spectrogram with highlights saved.")
+        logger.info("Session spectrogram saved: %s", os.path.basename(image_path))
 
     except Exception as e:
-        print(f"❌ Spectrogram Error: {e}")
+        logger.error("Failed to generate session spectrogram: %s", e)
 
 
 def generate_single_spectrogram(audio_path: str, single_image_path: str, bird: dict, recorded_at: str, lat, lon):
@@ -128,7 +135,7 @@ def generate_single_spectrogram(audio_path: str, single_image_path: str, bird: d
         plt.tight_layout()
         plt.savefig(single_image_path, bbox_inches="tight", pad_inches=0.1, dpi=300)
         plt.close()
-        print(f"🎨 Single spectrogram with highlights saved.")
+        logger.info("Single spectrogram saved: %s", os.path.basename(single_image_path))
 
     except Exception as e:
-        print(f"❌ Single Spectrogram Error: {e}")
+        logger.error("Failed to generate single spectrogram: %s", e)

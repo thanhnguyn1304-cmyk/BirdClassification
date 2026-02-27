@@ -1,0 +1,16 @@
+.venv/
+.git/
+__pycache__/
+*.pyc
+node_modules/
+frontend/node_modules/
+storage/
+*.db
+.env
+my_forest_audio/
+*.png
+*.xlsx
+tests/
+.vscode/
+.idea/
+.github/

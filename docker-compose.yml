@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./storage:/app/storage
+      - ./birds.db:/app/birds.db
+    env_file:
+      - .env
+    restart: unless-stopped

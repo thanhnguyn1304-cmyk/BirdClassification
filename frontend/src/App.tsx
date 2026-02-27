@@ -1,21 +1,25 @@
 import { Routes, Route, Link } from 'react-router-dom';
-import { Bird } from 'lucide-react';
+import { Bird, Bell } from 'lucide-react';
 import { Hero } from './components/Hero';
 import { BirdGallery } from './components/BirdGallery';
 import { SessionDetail } from './components/SessionDetail';
 import { Analytics } from './components/Analytics';
+import { NotificationProvider, useNotifications } from './contexts/NotificationContext';
+import { ToastContainer } from './components/Toast';
 
-function App() {
+function AppContent() {
+  const { unreadCount, markAllAsRead } = useNotifications();
+
   return (
     <div className="min-h-screen bg-coastal-blue">
       {/* Header - Brutal Style */}
       <header className="fixed top-0 w-full z-50 bg-sand-light border-b-4 border-ink-black">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-display font-bold text-xl text-ink-black tracking-tight uppercase">
+          <Link to="/" className="flex items-center gap-2 font-display font-bold text-xl text-ink-black tracking-tighter uppercase">
             <Bird className="w-6 h-6 text-coastal-blue" />
-            <span className="text-coastal-blue">Avian</span>Net
+            <span><span className="text-coastal-blue">Avian</span>Net</span>
           </Link>
-          <nav className="hidden md:block">
+          <nav className="flex items-center gap-4">
             <ul className="flex space-x-2 text-sm font-bold">
               <li>
                 <Link to="/" className="px-4 py-2 rounded-lg border-2 border-transparent hover:border-ink-black hover:bg-sun-yellow transition-all">
@@ -28,6 +32,19 @@ function App() {
                 </Link>
               </li>
             </ul>
+
+            {/* Notification Bell */}
+            <button
+              onClick={markAllAsRead}
+              className="relative p-2 rounded-lg hover:bg-sun-yellow border-2 border-transparent hover:border-ink-black transition-all group"
+            >
+              <Bell className="w-6 h-6 text-ink-black" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border-2 border-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
           </nav>
         </div>
       </header>
@@ -64,7 +81,18 @@ function App() {
           </div>
         </div>
       </footer>
+
+      {/* Toast Container for Popups */}
+      <ToastContainer />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <NotificationProvider>
+      <AppContent />
+    </NotificationProvider>
   );
 }
 

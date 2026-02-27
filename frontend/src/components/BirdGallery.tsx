@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import type { BirdDetection, SpeciesInfo } from '../types/bird';
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
-import { Calendar, Layers, Grid, Maximize2, Bird, MapPin, X, Clock, Activity } from 'lucide-react';
+import { Calendar, Layers, Grid, Maximize2, Bird, MapPin, X, Clock, Activity, ExternalLink } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export function BirdGallery() {
@@ -177,14 +177,19 @@ export function BirdGallery() {
                                     className="h-full flex flex-col text-center cursor-pointer"
                                     onClick={() => setSelectedSpecies(species)}
                                 >
-                                    <div className="w-28 h-28 mx-auto rounded-full overflow-hidden border-4 border-ink-black shadow-brutal mb-4 bg-white">
-                                        <img
-                                            src={species.image_url || '/placeholder-bird.png'}
-                                            alt={species.name}
-                                            className="w-full h-full object-cover"
-                                        />
+                                    <div className="w-28 h-28 mx-auto rounded-full overflow-hidden border-4 border-ink-black shadow-brutal mb-4 bg-coastal-blue/10 flex items-center justify-center">
+                                        <Bird className="w-14 h-14 text-coastal-blue" />
                                     </div>
-                                    <h3 className="text-xl font-display font-bold text-ink-black mb-2">{species.name}</h3>
+                                    <a
+                                        href={`https://www.google.com/search?q=${encodeURIComponent(species.name + ' bird')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="text-xl font-display font-bold text-coastal-blue hover:text-coastal-deepblue hover:underline mb-2 inline-flex items-center gap-1 justify-center"
+                                    >
+                                        {species.name}
+                                        <ExternalLink className="w-4 h-4" />
+                                    </a>
                                     <div className="flex justify-center items-center gap-2 mb-4">
                                         <span className="text-4xl font-display font-bold text-coastal-blue">{species.detection_count}</span>
                                         <span className="text-ink-gray text-sm uppercase tracking-wide font-bold">Detections</span>
@@ -219,15 +224,19 @@ export function BirdGallery() {
                             </button>
 
                             <div className="flex items-center gap-6">
-                                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white flex-shrink-0">
-                                    <img
-                                        src={selectedSpecies.image_url || '/placeholder-bird.png'}
-                                        alt={selectedSpecies.name}
-                                        className="w-full h-full object-cover"
-                                    />
+                                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+                                    <Bird className="w-12 h-12 text-white" />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-display font-bold">{selectedSpecies.name}</h2>
+                                    <a
+                                        href={`https://www.google.com/search?q=${encodeURIComponent(selectedSpecies.name + ' bird')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-3xl font-display font-bold hover:underline inline-flex items-center gap-2"
+                                    >
+                                        {selectedSpecies.name}
+                                        <ExternalLink className="w-5 h-5" />
+                                    </a>
                                     {selectedSpecies.region && (
                                         <div className="flex items-center gap-2 mt-2 text-white/80">
                                             <MapPin className="w-4 h-4" />
