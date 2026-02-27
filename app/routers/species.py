@@ -1,50 +1,44 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Dict, Any
+import sqlite3
 
-from ..database import get_db_connection
+from ..database import get_db
 
 
 router = APIRouter()
 
 
 @router.get("/api/species")
-def get_all_species() -> List[Dict[str, Any]]:
+def get_all_species(db: sqlite3.Connection = Depends(get_db)) -> List[Dict[str, Any]]:
     """Get all species from the cache with their info."""
-    conn = get_db_connection()
-    c = conn.cursor()
+    c = db.cursor()
     c.execute("SELECT * FROM species ORDER BY name")
     rows = c.fetchall()
-    conn.close()
-    
+
     return [dict(row) for row in rows]
 
 
 @router.get("/api/species/{species_name}")
-def get_species_by_name(species_name: str) -> Dict[str, Any]:
-    """
-    Get species info by name from the database cache.
-    """
-    conn = get_db_connection()
-    c = conn.cursor()
+def get_species_by_name(species_name: str, db: sqlite3.Connection = Depends(get_db)) -> Dict[str, Any]:
+    """Get species info by name from the database cache."""
+    c = db.cursor()
     c.execute("SELECT * FROM species WHERE name = ?", (species_name,))
     row = c.fetchone()
-    conn.close()
-    
+
     if not row:
         raise HTTPException(status_code=404, detail=f"Species '{species_name}' not found")
-    
+
     return dict(row)
 
 
 @router.get("/api/species-summary")
-def get_species_summary() -> List[Dict[str, Any]]:
+def get_species_summary(db: sqlite3.Connection = Depends(get_db)) -> List[Dict[str, Any]]:
     """
     Get a summary of all detected species with their info.
     Combines detection stats with species info from cache.
     """
-    conn = get_db_connection()
-    c = conn.cursor()
-    
+    c = db.cursor()
+
     # Get detection stats per species
     c.execute("""
         SELECT 
@@ -58,13 +52,11 @@ def get_species_summary() -> List[Dict[str, Any]]:
         ORDER BY detection_count DESC
     """)
     detection_stats = {row['species']: dict(row) for row in c.fetchall()}
-    
+
     # Get species info from cache
     c.execute("SELECT * FROM species")
     species_info = {row['name']: dict(row) for row in c.fetchall()}
-    
-    conn.close()
-    
+
     # Combine stats with species info
     result = []
     for species_name, stats in detection_stats.items():
@@ -82,5 +74,5 @@ def get_species_summary() -> List[Dict[str, Any]]:
             "habitat": info.get('habitat'),
             "conservation_status": info.get('conservation_status'),
         })
-    
+
     return result

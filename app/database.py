@@ -1,10 +1,12 @@
 import sqlite3
 from .config import DATABASE_PATH
 
+
 def init_db():
+    """Initialize database tables on startup."""
     conn = sqlite3.connect(DATABASE_PATH)
     c = conn.cursor()
-    
+
     # Detections table
     c.execute(
         """CREATE TABLE IF NOT EXISTS detections 
@@ -20,13 +22,13 @@ def init_db():
                   single_image_url TEXT,
                   bird_photo_url TEXT)"""
     )
-    
+
     # Add column if it doesn't exist (for existing databases)
     try:
         c.execute("ALTER TABLE detections ADD COLUMN bird_photo_url TEXT")
     except sqlite3.OperationalError:
         pass  # Column already exists
-    
+
     # Species cache table - stores bird info fetched from Wikipedia
     c.execute(
         """CREATE TABLE IF NOT EXISTS species
@@ -40,11 +42,27 @@ def init_db():
                   conservation_status TEXT,
                   created_at TEXT DEFAULT CURRENT_TIMESTAMP)"""
     )
-        
+
     conn.commit()
     conn.close()
 
-def get_db_connection():
+
+def get_db():
+    """
+    Database dependency for FastAPI.
+    
+    Usage in routers:
+        @router.get("/example")
+        def my_endpoint(db = Depends(get_db)):
+            c = db.cursor()
+            ...
+    
+    The connection is automatically closed after the request completes,
+    even if an exception occurs (finally block).
+    """
     conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        yield conn
+    finally:
+        conn.close()
