@@ -6,7 +6,6 @@ A full-stack environmental monitoring system that processes real-time audio from
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.128-green)
 ![React](https://img.shields.io/badge/React-Vite+TS-purple)
 ![AI](https://img.shields.io/badge/AI-BirdNET-orange)
-![CI](https://img.shields.io/badge/CI-GitHub_Actions-black)
 
 ---
 
@@ -43,7 +42,7 @@ ESP32 Sensor                  AvianNET Server                  Frontend
 | **Audio** | Librosa, PyDub, Matplotlib |
 | **Frontend** | React, TypeScript, Vite, Recharts, Tailwind CSS |
 | **Hardware** | ESP32 (I2S Microphone + GPS) |
-| **DevOps** | Docker, GitHub Actions CI |
+| **DevOps** | Docker |
 
 ---
 
